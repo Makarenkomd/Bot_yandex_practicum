@@ -1,59 +1,76 @@
 import logging
-
+import functools
 
 from config import TOKEN
 from telegram.ext import Application, MessageHandler, filters
 from telegram.ext import CommandHandler
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+#logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+#logger = logging.getLogger(__name__)
+
+logging.basicConfig(level=logging.INFO)
+
+def log_execution(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        logging.info(f"Executing {func.__name__}")
+        result = func(*args, **kwargs)
+        logging.info(f"Finished executing {func.__name__}")
+        return result
+    return wrapper
 
 reply_keyboard = [['/hobby', '/selfie', '/gpt']
                  ,['фото и сюрприз', 'sql и nosql', 'про любовь']]
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False, resize_keyboard=True)
 
-
 async def start(update, context):
     user = update.effective_user
+    logging.info("Command start")
     await update.message.reply_html(rf"Привет {user.mention_html()}! Давай знакомиться!",  reply_markup=markup)
 
 async def help_command(update, context):
+    logging.info("Command help")
     await update.message.reply_text("Команды всякие нужны! Но писать скучно и долго, поэтому предлагаю только /start, /help и /source)))")
 
 async def my_hobby(update, context):
+    logging.info("Command hobby")
     await update.message.reply_text(
         'Хобби у меня много Я люблю играть во все что с *мячем*, горные походы и гитару у костра\.\n'
-        "Но айтишная страть состоит в разработке *NLP* и не только инструментов для осетинского языка:  мультимедийный учебник по фонетике осетинского языка,  словари в машиночитаемом виде\.\n"
-        "Когдато давно, на заре моего увлечения, а это было еще в прошлом веке и даже тысячелетии ![😅](tg://emoji?id=128949399) , командой мы делали систему распознавания осетинского языка и компилятивный синтезатор осетинской речи\.\n"
+        "Но айтишная страcть состоит в разработке *NLP*, и не только, инструментов для осетинского языка:  мультимедийный учебник по фонетике осетинского языка,  словари в машиночитаемом виде\.\n"
+        "Когда\-то давно, на заре моего увлечения, а это было еще в прошлом веке и даже тысячелетии ![😅](tg://emoji?id=128949399), командой мы делали систему распознавания осетинского языка и компилятивный синтезатор осетинской речи\.\n"
         "Создаем маленькие языковые игры\. А прямо сейчас, работаем над системой проверки орфографии\.\n"
       , parse_mode='MarkdownV2')
 
+@log_execution
 async def stiker(update, context):
     await update.message.reply_text("Команды всякие нужны! Но писать скучно и долго, поэтому предлагаю только /start, /help и /source)))")
 
+@log_execution
 async def selfie(update, context):
     await context.bot.send_photo(
         update.message.chat_id, photo=open(r'images/selfie.jpg', 'rb'))
 
+@log_execution
 async def gpt(update, context):
     audio = open(r'audio/gpt.ogg', 'rb')
     await context.bot.send_audio(update.message.chat_id, audio)
     audio.close()
 
+@log_execution
 async def stiker(update, context):
     await context.bot.send_photo(
         update.message.chat_id, photo=open(r'images/mak0.jpg', 'rb'))
     await update.message.reply_html(
         "Это была скучная фоточка, но у меня есть куча стикеров  <a href='https://t.me/addstickers/MD_Makarenko'> со мной. </a> Пользуйтесь, люди добрые")
 
-
-
+@log_execution
 async def nosql(update, context):
     audio = open(r'audio/nosql.ogg', 'rb')
     await context.bot.send_audio(update.message.chat_id, audio)
     audio.close()
 
+@log_execution
 async def love(update, context):
     audio = open(r'audio/love.ogg', 'rb')
     await context.bot.send_audio(update.message.chat_id, audio)
