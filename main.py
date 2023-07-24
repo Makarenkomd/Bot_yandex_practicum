@@ -1,5 +1,6 @@
 import logging
 
+
 from config import TOKEN
 from telegram.ext import Application, MessageHandler, filters
 from telegram.ext import CommandHandler
@@ -9,11 +10,9 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 reply_keyboard = [['/hobby', '/selfie', '/gpt']
-                 ,['/stiker', '/nosql', '/love']]
+                 ,['фото и сюрприз', 'sql и nosql', 'про любовь']]
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False, resize_keyboard=True)
 
-async def echo(update, context):
-    await update.message.reply_text("я тупой ботик, я такой не понимай)")
 
 async def start(update, context):
     user = update.effective_user
@@ -64,6 +63,14 @@ async def love(update, context):
 async def source(update, context):
     await update.message.reply_html("Исходный код всего этого добра <a href='https://github.com/Makarenkomd/Bot_yandex_practicum.git'> тут </a>")
 
+command_dict = {'фото и сюрприз': stiker, 'sql и nosql': nosql, "про любовь": love}
+async def echo(update, context):
+    text = update.message.text
+    if text in command_dict:
+        await command_dict[text](update, context)
+    else:
+        await update.message.reply_text("я тупой ботик, я такой не понимай)")
+
 def main():
     application = Application.builder().token(TOKEN).build()
     text_handler = MessageHandler(filters.TEXT & ~filters.COMMAND, echo)
@@ -73,9 +80,9 @@ def main():
     application.add_handler(CommandHandler("hobby", my_hobby))
     application.add_handler(CommandHandler("selfie", selfie))
     application.add_handler(CommandHandler("gpt", gpt))
-    application.add_handler(CommandHandler("nosql", nosql))
-    application.add_handler(CommandHandler("stiker", stiker))
-    application.add_handler(CommandHandler("love", love))
+    #application.add_handler(CommandHandler("nosql", nosql))
+    #application.add_handler(CommandHandler("stiker", stiker))
+    #application.add_handler(CommandHandler("love", love))
 
     application.add_handler(CommandHandler("source", source))
 
